@@ -1,3 +1,5 @@
+#![no_std]
+
 /// Constructs a custom error type.
 ///
 /// # Examples
@@ -75,7 +77,7 @@
 ///
 /// ```
 /// use custom_error::custom_error;
-/// use std::{io, io::Read, fs::File, result::Result};
+/// use core::{io, io::Read, fs::File, result::Result};
 ///
 /// custom_error!{MyError
 ///     IO{source: io::Error} = "input/output error",
@@ -115,8 +117,8 @@
 ///
 /// ```
 /// use custom_error::custom_error;
-/// use std::io::Error;
-/// use std::io::ErrorKind::*;
+/// use core::io::Error;
+/// use core::io::ErrorKind::*;
 ///
 /// custom_error!{ pub MyError
 ///     Io{source: Error} = @{
@@ -145,6 +147,10 @@
 /// assert_ne!(ErrLevel::Small, ErrLevel::Serious);
 /// assert!(ErrLevel::Small < ErrLevel::Serious);
 /// ```
+
+mod error;
+pub use error::Error;
+
 #[macro_export]
 macro_rules! custom_error {
     (
@@ -182,11 +188,11 @@ macro_rules! custom_error {
 
         $crate::add_type_bounds! {
         ( $($($type_param),*)* )
-        (std::fmt::Debug + std::fmt::Display)
-        { impl <} {> std::error::Error
+        (core::fmt::Debug + core::fmt::Display)
+        { impl <} {> custom_error::Error
             for $errtype $( < $($type_param),* > )*
         {
-            fn source(&self) -> Option<&(dyn std::error::Error + 'static)>
+            fn source(&self) -> Option<&(dyn custom_error::Error + 'static)>
             {
                 #[allow(unused_variables, unreachable_code)]
                 match self {$(
@@ -215,12 +221,12 @@ macro_rules! custom_error {
 
         $crate::add_type_bounds! {
         ( $($($type_param),*)* )
-        (std::string::ToString)
-        { impl <} {> std::fmt::Display
+        (core::string::ToString)
+        { impl <} {> core::fmt::Display
             for $errtype $( < $($type_param),* > )*
         {
-            fn fmt(&self, formatter: &mut std::fmt::Formatter)
-                -> std::fmt::Result
+            fn fmt(&self, formatter: &mut core::fmt::Formatter)
+                -> core::fmt::Result
             {
                 match self {$(
                     $errtype::$field $( { $( $attr_name ),* } )* => {
@@ -265,11 +271,12 @@ macro_rules! custom_error {
 
         $crate::add_type_bounds! {
         ( $($($type_param),*)* )
-        (std::fmt::Debug + std::fmt::Display)
-        { impl <} {> std::error::Error
+        (core::fmt::Debug + core::fmt::Display)
+        { impl <} {> custom_error::Error
             for $errtype $( < $($type_param),* > )*
         {
-            fn source(&self) -> Option<&(dyn std::error::Error + 'static)>
+            #[allow(unused_variables, unreachable_code)]
+            fn source(&self) -> Option<&(dyn custom_error::Error + 'static)>
             {
                 #[allow(unused_variables, unreachable_code)]
                 match self {
@@ -291,12 +298,12 @@ macro_rules! custom_error {
 
         $crate::add_type_bounds! {
         ( $($($type_param),*)* )
-        (std::string::ToString)
-        { impl <} {> std::fmt::Display
+        (core::string::ToString)
+        { impl <} {> core::fmt::Display
             for $errtype $( < $($type_param),* > )*
         {
-            fn fmt(&self, formatter: &mut std::fmt::Formatter)
-                -> std::fmt::Result
+            fn fmt(&self, formatter: &mut core::fmt::Formatter)
+                -> core::fmt::Result
             {
                 // make fields accessible with variables, so that we can
                 // use them in custom error msg blocks without self
@@ -655,7 +662,7 @@ mod tests {
 
     #[test]
     fn source() {
-        use std::{error::Error, io};
+        use core::{error::Error, io};
         custom_error!(E A{source: io::Error}="");
         let source: io::Error = io::ErrorKind::InvalidData.into();
         assert_eq!(
@@ -666,7 +673,7 @@ mod tests {
 
     #[test]
     fn struct_source() {
-        use std::{error::Error, io};
+        use core::{error::Error, io};
         custom_error!(E { source: io::Error } = "");
         let source: io::Error = io::ErrorKind::InvalidData.into();
         assert_eq!(
@@ -677,7 +684,7 @@ mod tests {
 
     #[test]
     fn from_source() {
-        use std::io;
+        use core::io;
         custom_error!(E A{source: io::Error}="bella vita");
         let source = io::Error::from(io::ErrorKind::InvalidData);
         assert_eq!("bella vita", E::from(source).to_string());
@@ -685,7 +692,7 @@ mod tests {
 
     #[test]
     fn struct_from_source() {
-        use std::io;
+        use core::io;
         custom_error!(E { source: io::Error } = "bella vita");
         let source = io::Error::from(io::ErrorKind::InvalidData);
         assert_eq!("bella vita", E::from(source).to_string());
@@ -694,7 +701,7 @@ mod tests {
     #[test]
     #[allow(dead_code)]
     fn with_source_and_others() {
-        use std::{error::Error, io};
+        use core::{error::Error, io};
         custom_error!(MyError Zero="", One{x:u8}="", Two{x:u8, source:io::Error}="{x}");
         fn source() -> io::Error {
             io::ErrorKind::AlreadyExists.into()
@@ -710,7 +717,7 @@ mod tests {
     #[test]
     #[allow(dead_code)]
     fn struct_with_source_and_others() {
-        use std::{error::Error, io};
+        use core::{error::Error, io};
         custom_error!(
             MyError {
                 x: u8,
@@ -822,7 +829,7 @@ mod tests {
 
     #[test]
     fn custom_format_source() {
-        use std::io;
+        use core::io;
 
         custom_error! {MyError
             Io{source:io::Error} = @{format!("IO Error occurred: {:?}", source.kind())}
@@ -839,7 +846,7 @@ mod tests {
 
     #[test]
     fn struct_custom_format_source() {
-        use std::io;
+        use core::io;
 
         custom_error! {MyError{source:io::Error} = @{format!("IO Error occurred: {:?}", source.kind())} }
 
@@ -858,16 +865,16 @@ mod tests {
         struct SourceError<'my_lifetime> {
             x: &'my_lifetime str,
         }
-        impl<'a> std::fmt::Display for SourceError<'a> {
-            fn fmt(&self, _: &mut std::fmt::Formatter) -> std::fmt::Result {
+        impl<'a> core::fmt::Display for SourceError<'a> {
+            fn fmt(&self, _: &mut core::fmt::Formatter) -> core::fmt::Result {
                 Ok(())
             }
         }
-        impl<'a> std::error::Error for SourceError<'a> {}
+        impl<'a> custom_error::Error for SourceError<'a> {}
 
         custom_error! { MyError<'source_lifetime>
-            Sourced { lifetimed : SourceError<'source_lifetime> } = @{ lifetimed.x },
-            Other { source: std::fmt::Error } = "other error"
+            Sourced { source : SourceError<'source_lifetime> } = @{ source.x },
+            Other { source: core::fmt::Error } = "other error"
         }
 
         let sourced = MyError::Sourced {
@@ -876,7 +883,7 @@ mod tests {
             },
         };
         assert_eq!("I am the source", sourced.to_string());
-        let other_err: MyError = std::fmt::Error.into();
+        let other_err: MyError = core::fmt::Error.into();
         assert_eq!("other error", other_err.to_string());
     }
 
@@ -886,12 +893,12 @@ mod tests {
         struct SourceError<'my_lifetime> {
             x: &'my_lifetime str,
         }
-        impl<'a> std::fmt::Display for SourceError<'a> {
-            fn fmt(&self, _: &mut std::fmt::Formatter) -> std::fmt::Result {
+        impl<'a> core::fmt::Display for SourceError<'a> {
+            fn fmt(&self, _: &mut core::fmt::Formatter) -> core::fmt::Result {
                 Ok(())
             }
         }
-        impl<'a> std::error::Error for SourceError<'a> {}
+        impl<'a> custom_error::Error for SourceError<'a> {}
 
         custom_error! { MyError<'source_lifetime>{
             lifetimed : SourceError<'source_lifetime>
