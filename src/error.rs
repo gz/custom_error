@@ -1,5 +1,5 @@
 use core::any::TypeId;
-use core::fmt::{self, Debug, Display};
+use core::fmt::{Debug, Display};
 
 /// Copied from libstd for now
 /// This will be in libcore again: (https://doc.rust-lang.org/nightly/src/std/error.rs.html#5)
