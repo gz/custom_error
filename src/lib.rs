@@ -8,7 +8,7 @@
 ///
 /// For an error with multiple cases you can generate an enum:
 /// ```
-/// use custom_error::custom_error;
+/// use custom_error_core::custom_error;
 ///
 /// custom_error!{ pub MyError
 ///     Bad      = "Something bad happened",
@@ -20,7 +20,7 @@
 ///
 /// For an error with a single case you can generate a struct:
 /// ```
-/// use custom_error::custom_error;
+/// use custom_error_core::custom_error;
 ///
 /// custom_error!{ pub MyError{} = "Something bad happened" }
 /// assert_eq!("Something bad happened", MyError{}.to_string());
@@ -28,7 +28,7 @@
 ///
 /// ### Custom error with parameters
 /// ```
-/// use custom_error::custom_error;
+/// use custom_error_core::custom_error;
 ///
 /// custom_error!{SantaError
 ///     BadChild{name:String, foolishness:u8} = "{name} has been bad {foolishness} times this year",
@@ -76,7 +76,7 @@
 ///    and manually implement the error conversion from this type to your error type.
 ///
 /// ```
-/// use custom_error::custom_error;
+/// use custom_error_core::custom_error;
 /// use core::{io, io::Read, fs::File, result::Result};
 ///
 /// custom_error!{MyError
@@ -102,7 +102,7 @@
 /// you can use custom code to generate your error description.
 ///
 /// ```
-/// use custom_error::custom_error;
+/// use custom_error_core::custom_error;
 ///
 /// static LANG : &'static str = "FR";
 ///
@@ -116,7 +116,7 @@
 /// ```
 ///
 /// ```
-/// use custom_error::custom_error;
+/// use custom_error_core::custom_error;
 /// use core::io::Error;
 /// use core::io::ErrorKind::*;
 ///
@@ -138,7 +138,7 @@
 /// at the beginning of the macro invocation. This allows you to derive traits for your error:
 ///
 /// ```
-/// use custom_error::custom_error;
+/// use custom_error_core::custom_error;
 ///
 /// custom_error! {
 ///     #[derive(PartialEq,PartialOrd)]
@@ -189,10 +189,10 @@ macro_rules! custom_error {
         $crate::add_type_bounds! {
         ( $($($type_param),*)* )
         (core::fmt::Debug + core::fmt::Display)
-        { impl <} {> custom_error::Error
+        { impl <} {> custom_error_core::Error
             for $errtype $( < $($type_param),* > )*
         {
-            fn source(&self) -> Option<&(dyn custom_error::Error + 'static)>
+            fn source(&self) -> Option<&(dyn custom_error_core::Error + 'static)>
             {
                 #[allow(unused_variables, unreachable_code)]
                 match self {$(
@@ -272,11 +272,11 @@ macro_rules! custom_error {
         $crate::add_type_bounds! {
         ( $($($type_param),*)* )
         (core::fmt::Debug + core::fmt::Display)
-        { impl <} {> custom_error::Error
+        { impl <} {> custom_error_core::Error
             for $errtype $( < $($type_param),* > )*
         {
             #[allow(unused_variables, unreachable_code)]
-            fn source(&self) -> Option<&(dyn custom_error::Error + 'static)>
+            fn source(&self) -> Option<&(dyn custom_error_core::Error + 'static)>
             {
                 #[allow(unused_variables, unreachable_code)]
                 match self {
@@ -870,7 +870,7 @@ mod tests {
                 Ok(())
             }
         }
-        impl<'a> custom_error::Error for SourceError<'a> {}
+        impl<'a> custom_error_core::Error for SourceError<'a> {}
 
         custom_error! { MyError<'source_lifetime>
             Sourced { source : SourceError<'source_lifetime> } = @{ source.x },
@@ -898,7 +898,7 @@ mod tests {
                 Ok(())
             }
         }
-        impl<'a> custom_error::Error for SourceError<'a> {}
+        impl<'a> custom_error_core::Error for SourceError<'a> {}
 
         custom_error! { MyError<'source_lifetime>{
             lifetimed : SourceError<'source_lifetime>
