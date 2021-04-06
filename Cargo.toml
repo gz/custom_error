@@ -1,11 +1,11 @@
 [package]
-name = "custom_error"
-description = "Define custom errors without boilerplate using the custom_error! macro."
+name = "custom_error_core"
+description = "Define custom errors without boilerplate using the custom_error! macro (a version of custom_error for no-std environments)."
 version = "1.8.0"
 authors = ["lovasoa"]
 license = "BSD-2-Clause"
 homepage = "https://github.com/lovasoa/custom_error"
-repository = "https://github.com/lovasoa/custom_error"
+repository = "https://github.com/gz/custom_error"
 readme = "README.md"
 categories = ["rust-patterns", "development-tools", "encoding"]
 keywords = ["error", "failure", "macro"]
@@ -15,4 +15,3 @@ edition='2018'
 [dependencies]
 
 [badges]
-travis-ci = { repository = "lovasoa/custom_error", branch = "master" }
