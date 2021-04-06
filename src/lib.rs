@@ -326,7 +326,7 @@ macro_rules! return_if_source {
     (source, $attr_name:ident) => {{
         // Borrow is needed in order to support boxed errors
         // see: https://github.com/lovasoa/custom_error/issues/20
-        return Some(std::borrow::Borrow::borrow($attr_name));
+        return Some(core::borrow::Borrow::borrow($attr_name));
     }};
     // If the attribute has a different name, return nothing
     ($_attr_name:ident, $_repeat:ident ) => {
